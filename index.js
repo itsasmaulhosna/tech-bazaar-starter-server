@@ -36,15 +36,19 @@ async function run() {
     const userCollection = db.collection('users');
 
     app.post('/subscription', async (req, res) => {
-      const { user, session_id } = body;
+      const { user, session_id } =req.body;
       const subs_result = await subscriptionCollection.insertOne({
         userId: new ObjectId(user.id),
         session_id,
       });
       const user_result = await userCollection.updateOne(
+
         { _id: new ObjectId(user.id) },
-        { $set: { plan: 'pro' } },
+        { $set: { plan: "pro" } },
       );
+
+
+      console.log('user_result:', user_result);
       res.send({
         subs_result,
         user_result,
