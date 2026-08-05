@@ -33,7 +33,7 @@ async function run() {
     await client.connect();
     const db = client.db('tech-bazaar');
     const subscriptionCollection = db.collection('subscriptions');
-    const userCollection = db.collection('users');
+    const userCollection = db.collection('user');
 
     app.post('/subscription', async (req, res) => {
       const { user, session_id } =req.body;
@@ -41,14 +41,20 @@ async function run() {
         userId: new ObjectId(user.id),
         session_id,
       });
-      const user_result = await userCollection.updateOne(
+      const dbUser = await userCollection.findOne({
+  email: user.email,
+});
 
-        { _id: new ObjectId(user.id) },
-        { $set: { plan: "pro" } },
-      );
+console.log("DB User:", dbUser);
 
-
-      console.log('user_result:', user_result);
+const user_result = await userCollection.updateOne(
+  { email: user.email },
+  {
+    $set: {
+      plan: "pro",
+    },
+  }
+);
       res.send({
         subs_result,
         user_result,
