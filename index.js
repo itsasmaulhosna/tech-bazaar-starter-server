@@ -1,10 +1,10 @@
 const dns = require('node:dns');
-dns.setServers(['1.1.1.1', '1.0.0.1']); 
+dns.setServers(['1.1.1.1', '1.0.0.1']);
 
-const express = require("express");
-const dontenv = require("dotenv");
-const cors = require("cors");
-const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const express = require('express');
+const dontenv = require('dotenv');
+const cors = require('cors');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 dontenv.config();
 
 const uri = process.env.MONGODB_URI;
@@ -31,13 +31,29 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     await client.connect();
-    const db = client.db("tech-bazaar");
+    const db = client.db('tech-bazaar');
+    const subscriptionCollection = db.collection('subscriptions');
+    const userCollection = db.collection('users');
 
- 
+    app.post('/subscription', async (req, res) => {
+      const { user, session_id } = body;
+      const subs_result = await subscriptionCollection.insertOne({
+        userId: new ObjectId(user.id),
+        session_id,
+      });
+      const user_result = await userCollection.updateOne(
+        { _id: new ObjectId(user.id) },
+        { $set: { plan: 'pro' } },
+      );
+      res.send({
+        subs_result,
+        user_result,
+      });
+    });
 
-    await client.db("admin").command({ ping: 1 });
+    await client.db('admin').command({ ping: 1 });
     console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!",
+      'Pinged your deployment. You successfully connected to MongoDB!',
     );
   } finally {
     // Ensures that the client will close when you finish/error
@@ -46,8 +62,8 @@ async function run() {
 }
 run().catch(console.dir);
 
-app.get("/", (req, res) => {
-  res.send("Server is running fine!");
+app.get('/', (req, res) => {
+  res.send('Server is running fine!');
 });
 
 app.listen(PORT, () => {
