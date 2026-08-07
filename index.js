@@ -36,25 +36,33 @@ async function run() {
     const userCollection = db.collection('user');
 
     app.post('/subscription', async (req, res) => {
-      const { user, session_id } =req.body;
+      const { user, session_id } = req.body;
+      const isExistSession = await subscriptionCollection.findOne({
+        session_id,
+      });
+      if (isExistSession) {
+        return res
+          .status(400)
+          .send({ message: 'Subscription already exists for this session_id' });
+      }
       const subs_result = await subscriptionCollection.insertOne({
         userId: new ObjectId(user.id),
         session_id,
       });
       const dbUser = await userCollection.findOne({
-  email: user.email,
-});
+        email: user.email,
+      });
 
-console.log("DB User:", dbUser);
+      console.log('DB User:', dbUser);
 
-const user_result = await userCollection.updateOne(
-  { email: user.email },
-  {
-    $set: {
-      plan: "pro",
-    },
-  }
-);
+      const user_result = await userCollection.updateOne(
+        { email: user.email },
+        {
+          $set: {
+            plan: 'pro',
+          },
+        },
+      );
       res.send({
         subs_result,
         user_result,
