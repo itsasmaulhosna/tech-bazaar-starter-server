@@ -34,7 +34,7 @@ async function run() {
     const db = client.db('tech-bazaar');
     const subscriptionCollection = db.collection('subscriptions');
     const userCollection = db.collection('user');
-
+    const productCollection = db.collection('products');
     app.post('/subscription', async (req, res) => {
       const { user, session_id } = req.body;
       const isExistSession = await subscriptionCollection.findOne({
@@ -69,6 +69,12 @@ async function run() {
       });
     });
 
+    // products api
+    app.post('/produucts', async (req, res) => {
+      const product = req.body;
+      const result = await productCollection.insertOne(product);
+      res.send(result);
+    });
     await client.db('admin').command({ ping: 1 });
     console.log(
       'Pinged your deployment. You successfully connected to MongoDB!',
