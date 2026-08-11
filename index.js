@@ -70,9 +70,13 @@ async function run() {
     });
 
     // products api
-    app.post('/produucts', async (req, res) => {
+    app.post('/products', async (req, res) => {
       const product = req.body;
-      const result = await productCollection.insertOne(product);
+      const result = await productCollection.insertOne({
+        ...product,
+        price: Number(product.price),
+        quantity: Number(product.quantity),
+      });
       res.send(result);
     });
     await client.db('admin').command({ ping: 1 });
