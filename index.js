@@ -33,8 +33,10 @@ async function run() {
     await client.connect();
     const db = client.db('tech-bazaar');
     const subscriptionCollection = db.collection('subscriptions');
+    const paymentCollection = db.collection('payments');
     const userCollection = db.collection('user');
     const productCollection = db.collection('products');
+    // subscription api
     app.post('/subscription', async (req, res) => {
       const { user, session_id } = req.body;
       const isExistSession = await subscriptionCollection.findOne({
@@ -68,7 +70,29 @@ async function run() {
         user_result,
       });
     });
+    // payment api
+    app.post('/payment', async (req, res) => {
+      const { price, name, userId, productId, session_id } = req.body;
+      const isExistSession = await paymentCollection.findOne({
+        session_id,
+      });
+      if (isExistSession) {
+        return res
+          .status(400)
+          .send({ message: 'Payment already exists for this session_id' });
+      }
+      const pays_result = await paymentCollection.insertOne({
+        userId,
+        session_id,
+        price: Number(price),
+        name,
+        productId,
+      });
 
+      res.send({
+        pays_result,
+      });
+    });
     // products api
     app.post('/products', async (req, res) => {
       const product = req.body;
